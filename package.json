@@ -4,9 +4,8 @@
   "description": "A Node.js application to merge PDF files using pdf-merger-js and Express.js.",
   "main": "server.js",
   "scripts": {
-    "start": "webpack serve --open",
-    "dev": "nodemon server.js",
-    "build": "webpack"
+    "start": "",
+    "dev": "nodemon server.js"
   },
   "keywords": [
     "pdf",
@@ -47,7 +46,7 @@
     "url": "https://github.com/yourusername/pdf-merger"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/pdf-merger/issues"
+    "url": "https://github.com/yourusername/Ankitbhagat2062/issues"
   },
-  "homepage": "https://github.com/yourusername/pdf-merger#readme"
+  "homepage": "https://github.com/Ankitbhagat2062/pdf-merger#readme"
 }
