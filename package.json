@@ -1,0 +1,53 @@
+{
+  "name": "pdf-merger",
+  "version": "1.0.0",
+  "description": "A Node.js application to merge PDF files using pdf-merger-js and Express.js.",
+  "main": "server.js",
+  "scripts": {
+    "start": "webpack serve --open",
+    "dev": "nodemon server.js",
+    "build": "webpack"
+  },
+  "keywords": [
+    "pdf",
+    "merge",
+    "nodejs",
+    "express",
+    "pdf-merge",
+    "backend",
+    "pdfjs"
+  ],
+  "author": "Your Name",
+  "license": "ISC",
+  "dependencies": {
+    "compresser": "^0.0.9",
+    "dir-compress": "^0.0.5",
+    "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1",
+    "pdf-lib": "^1.17.1",
+    "pdf-merge": "^1.2.0",
+    "pdf-merger-js": "^5.1.2",
+    "pdfjs-dist": "^4.10.38"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "directories": {
+    "public": "public",
+    "scripts": "JS",
+    "styles": "CSS",
+    "views": "templates"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/pdf-merger"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/pdf-merger/issues"
+  },
+  "homepage": "https://github.com/yourusername/pdf-merger#readme"
+}
