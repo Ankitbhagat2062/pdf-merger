@@ -1,3 +1,5 @@
+const { response } = require("express");
+
 pdffilename = document.getElementsByClassName('pdf-pages')
 const pdfInput = document.getElementById("pdfs");
 const previewContainer = document.getElementById("preview-container");
@@ -209,7 +211,7 @@ async function mergeSelectedPages() {
   try {
     console.log("FormData before sending:", formData);
     
-    fetch('https://pdf-merger-glit.vercel.app/api/server', {
+    const response = await fetch('https://pdf-merger-glit.vercel.app/api/server', {
       method: 'POST',
       body: formData,
       mode: 'no-cors',
