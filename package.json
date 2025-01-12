@@ -1,37 +1,36 @@
 {
   "name": "pdf-merger",
   "version": "1.0.0",
-  "description": "A Node.js application to merge PDF files using pdf-merger-js and Express.js.",
-  "main": "server.js",
+  "description": "A Node.js application to merge PDF files using pdf-merger-js and serverless functions on Vercel.",
+  "main": "index.js",  // Change to the main file if you use serverless functions
   "scripts": {
-    "start": "",
-    "dev": "nodemon server.js"
+    "start": "vercel dev",  // Use vercel dev for local development
+    "build": "vercel build",
+    "deploy": "vercel deploy" // Optional: you can deploy directly from command line
   },
   "keywords": [
     "pdf",
     "merge",
     "nodejs",
-    "express",
-    "pdf-merge",
-    "backend",
-    "pdfjs"
+    "serverless",
+    "vercel",
+    "pdf-merge"
   ],
-  "author": "Your Name",
+  "author": "Ankit Bhagat",
   "license": "ISC",
   "dependencies": {
-    "compresser": "^0.0.9",
-    "dir-compress": "^0.0.5",
-    "express": "^4.21.2",
+    "express": "^4.21.2",  // Express used for local development, but Vercel will rely on serverless functions
     "multer": "^1.4.5-lts.1",
     "pdf-lib": "^1.17.1",
     "pdf-merge": "^1.2.0",
     "pdf-merger-js": "^5.1.2",
-    "pdfjs-dist": "^4.10.38"
+    "rimraf": "^6.0.1",
+    "vercel": "^32.3.0"  // Vercel CLI dependency for local testing and deployment
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9"  // Useful for local dev testing if needed
   },
-  "type": "module",
+  "type": "module",  // Ensures usage of ES modules
   "engines": {
     "node": ">=16.0.0"
   },
@@ -43,7 +42,7 @@
   },
   "repository": {
     "type": "git",
-     "url": "https://github.com/Ankitbhagat2062/pdf-merger"
+    "url": "https://github.com/Ankitbhagat2062/pdf-merger"
   },
   "bugs": {
     "url": "https://github.com/Ankitbhagat2062/pdf-merger/issues"
