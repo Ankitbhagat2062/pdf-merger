@@ -210,7 +210,7 @@ async function mergeSelectedPages() {
     console.log("FormData before sending:", formData);
     
     // Make the fetch request to the Vercel API route
-    const response = await fetch('../../api/server', {
+    const response = await fetch('https://pdf-merger-glit.vercel.app/api/merge', { 
       method: 'POST',
       body: formData,
     });
