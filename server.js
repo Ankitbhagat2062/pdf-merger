@@ -17,6 +17,10 @@ export default async function handler(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "https://pdf-merger-gilt.vercel.app");
     res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS"); // Allowed HTTP methods
     res.setHeader("Access-Control-Allow-Headers", "Content-Type"); // Allowed headers
+    if (req.method === "OPTIONS") {
+      // Handle CORS preflight request
+      return res.status(200).end();
+    }
   try {
     if (req.method !== "POST") {
       res.status(405).send("Method Not Allowed");
