@@ -1,100 +1,32 @@
-import multer from "multer";
-import path from "path";
-import { mergePdfs } from "./api/merge"; // Adjust the import to your file location
-import { rimraf } from "rimraf";
-import fs from "fs/promises";
+const express = require('express');
+const app = express();
+const PDFLib = require('pdf-lib');
+const fs = require('fs');
+const path = require('path');
 
-const upload = multer({ dest: "/tmp/uploads/", limits: { fileSize: 50 * 1024 * 1024 } });
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-export const config = {
-  api: {
-    bodyParser: false, // Disable default body parser as we use multer
-  },
-};
-
-export default async function handler(req, res) {
-    // Allow requests from your frontend
-    res.setHeader("Access-Control-Allow-Origin", "https://pdf-merger-gilt.vercel.app");
-    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS"); // Allowed HTTP methods
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type"); // Allowed headers
-    if (req.method === "OPTIONS") {
-      // Handle CORS preflight request
-      return res.status(200).end();
-    }
+app.post('/api/merge', async (req, res) => {
   try {
-    if (req.method !== "POST") {
-      res.status(405).send("Method Not Allowed");
-      return;
+    const files = req.files; // Assuming you're sending the files via a form-data POST request
+    const mergedPdf = await PDFLib.PDFDocument.create();
+
+    for (const file of files) {
+      const pdfDoc = await PDFLib.PDFDocument.load(file.data);
+      const pages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
+      pages.forEach(page => mergedPdf.addPage(page));
     }
 
-    // Logic for processing the file upload and merging...
-    res.status(200).send({ success: true, message: "Merge completed!" });
+    const mergedPdfBytes = await mergedPdf.save();
+    res.setHeader('Content-Type', 'application/pdf');
+    res.send(mergedPdfBytes);
   } catch (error) {
-    console.error("Serverless Function Error:", error); // Log the error
-    res.status(500).send({ error: "An internal server error occurred." });
+    console.error('Error merging PDFs:', error);
+    res.status(500).send('Error merging PDFs');
   }
-  if (req.method === "POST") {
-    // Middleware for file upload
-    const multerPromise = new Promise((resolve, reject) => {
-      upload.array("pdfs", 12)(req, {}, (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
+});
 
-    try {
-      // Wait for multer to complete
-      await multerPromise();
-
-      // Get selected pages from request body
-      const selectedPages = JSON.parse(req.body.selectedPages || "[]");
-      if (!selectedPages.length) {
-        return res.status(400).send("No pages selected for merging.");
-      }
-
-      // Map uploaded files
-      const uploadedFiles = req.files.reduce((acc, file) => {
-        acc[file.originalname] = file.path;
-        return acc;
-      }, {});
-
-      // Create ordered files based on selected pages
-      const orderedFiles = selectedPages.map(({ fileName, pageNum }) => {
-        const uploadedFilePath = uploadedFiles[fileName];
-        if (!uploadedFilePath) {
-          throw new Error(`Uploaded file '${fileName}' not found.`);
-        }
-        return { path: uploadedFilePath, range: pageNum };
-      });
-
-      // Generate merged file name
-      let mergedFileName = "merged";
-      req.files.forEach((file) => {
-        mergedFileName += `_${file.originalname.replace(".pdf", "")}`;
-      });
-      mergedFileName += `_${Date.now()}.pdf`;
-
-      // Set the output path in the /tmp directory (Vercel's writable temp storage)
-      const outputFilePath = path.join("/tmp", mergedFileName);
-
-      // Merge PDFs
-      await mergePdfs(orderedFiles, outputFilePath);
-
-      // Serve the merged file
-      const fileBuffer = await fs.readFile(outputFilePath);
-      res.setHeader("Content-Disposition", `attachment; filename=${mergedFileName}`);
-      res.setHeader("Content-Type", "application/pdf");
-      res.send(fileBuffer);
-
-      // Clean up the merged file after serving
-      setTimeout(() => {
-        rimraf(outputFilePath).catch(console.error);
-      }, 20 * 1000); // Delay file deletion by 20 seconds
-    } catch (error) {
-      console.error("Error merging PDFs:", error.message);
-      res.status(500).send(`An error occurred while merging PDFs: ${error.message}`);
-    }
-  } else {
-    res.status(405).send("Method Not Allowed");
-  }
-}
+app.listen(3000, () => {
+  console.log('Backend is running on port 3000');
+});
