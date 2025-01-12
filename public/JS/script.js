@@ -261,12 +261,12 @@ function handlePageSelection(checkbox) {
   }
 }
 
-// Merge selected pages into a single PDF using pdf-lib
 async function mergeSelectedPages() {
   if (selectedPages.length === 0) {
     console.log("Please select at least one page to merge.");
     return;
   }
+  
   const formData = new FormData();
   console.log("Selected Pages Data:", JSON.stringify(selectedPages)); // Log this to verify
   formData.append('selectedPages', JSON.stringify(selectedPages));
@@ -274,46 +274,49 @@ async function mergeSelectedPages() {
   const files = document.getElementById('pdfs').files;
   Array.from(files).forEach(file => {
     formData.append('pdfs', file);
-    console.log("pdfs",file)
+    console.log("pdfs", file);
   });
+  
   // Send the selected pages and files to the backend
   try {
     console.log("FormData before sending:", formData);
-    const response = await fetch('/merge', {
+    
+    // Make the fetch request to the Vercel API route
+    const response = await fetch('/api/merge', {
       method: 'POST',
       body: formData,
     });
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.log(errorText); // Show error message to the user
-    } 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Error merging PDFs:", errorText);
+      console.log("Error merging PDFs:", errorText);
       return;
     }
-    // if (response.ok) {
-      const result = await response.json();
-      const mergedFileUrl = result.mergedFileUrl;
-      
-      // Redirect the user to view the merged file
-      window.location.href = mergedFileUrl;
-      //  // Redirect to or download the merged PDF
+
+    const result = await response.json();
+    const mergedFileUrl = result.mergedFileUrl;
+
+    // Redirect the user to view the merged file
+    if (mergedFileUrl) {
+      console.log("Merged PDF URL:", mergedFileUrl);
+
+      // Create a link element to download the merged file
       const link = document.createElement("a");
       link.href = mergedFileUrl;
       link.download = mergedFileUrl.split("/").pop(); // Use the file name from the URL
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link); // Clean up
-      
-    // } else {
-    //   console.log("Error merging PDFs.");
-    // }
+
+      // Optionally, redirect to the merged file URL for viewing
+      window.location.href = mergedFileUrl;
+    }
   } catch (error) {
     console.error("Error:", error);
     console.log("An error occurred while merging PDFs.");
   }
 }
+
 // Attach the mergeSelectedPages function to the submit button
 document.querySelector('button[type="submit"]').addEventListener('click', (event) => {
   event.preventDefault(); // Prevent form submission
