@@ -13,6 +13,10 @@ export const config = {
 };
 
 export default async function handler(req, res) {
+    // Allow requests from your frontend
+    res.setHeader("Access-Control-Allow-Origin", "https://pdf-merger-gilt.vercel.app");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS"); // Allowed HTTP methods
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type"); // Allowed headers
   try {
     if (req.method !== "POST") {
       res.status(405).send("Method Not Allowed");
