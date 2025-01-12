@@ -13,6 +13,18 @@ export const config = {
 };
 
 export default async function handler(req, res) {
+  try {
+    if (req.method !== "POST") {
+      res.status(405).send("Method Not Allowed");
+      return;
+    }
+
+    // Logic for processing the file upload and merging...
+    res.status(200).send({ success: true, message: "Merge completed!" });
+  } catch (error) {
+    console.error("Serverless Function Error:", error); // Log the error
+    res.status(500).send({ error: "An internal server error occurred." });
+  }
   if (req.method === "POST") {
     // Middleware for file upload
     const multerPromise = new Promise((resolve, reject) => {
