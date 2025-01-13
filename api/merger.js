@@ -1,6 +1,6 @@
 import multer from 'multer';
 import path from 'path';
-import { mergePdfs } from '../mergePDF.js'; // Assuming you have a merge.js for the PDF logic
+import { mergePdfs } from '../merge.js'; // Assuming you have a merge.js for the PDF logic
 import { rimraf } from 'rimraf';
 // import fs from 'fs/promises';
 
