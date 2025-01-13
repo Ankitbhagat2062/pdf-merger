@@ -45,8 +45,8 @@ export default async function handler(req, res) {
 
       // Merge the selected pages from ordered files
       await mergePdfs(orderedFiles, outputFilePath);
-      const mergedFileUrl = `/merged_files/${mergedFileName}`;
-      res.status(200).json({ mergedFileUrl });
+      // const mergedFileUrl = `/merged_files/${mergedFileName}`;
+      // res.status(200).json({ mergedFileUrl });
       res.redirect(`/merged_files/${mergedFileName}`);
 
       setTimeout(() => {

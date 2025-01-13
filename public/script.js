@@ -205,42 +205,42 @@ async function mergeSelectedPages() {
     formData.append('pdfs', file);
     console.log("pdfs",file)
   });
-  try {
-    console.log("FormData before sending:", formData);
-    const response = await fetch('/merge', {
-      method: 'POST',
-      body: formData,
-    });
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.log(errorText); // Show error message to the user
-    } 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Error merging PDFs:", errorText);
-      return;
-    }
-    // if (response.ok) {
-      const result = await response.json();
-      const mergedFileUrl = result.mergedFileUrl;
+  // try {
+  //   console.log("FormData before sending:", formData);
+  //   const response = await fetch('/merge', {
+  //     method: 'POST',
+  //     body: formData,
+  //   });
+  //   if (!response.ok) {
+  //     const errorText = await response.text();
+  //     console.log(errorText); // Show error message to the user
+  //   } 
+  //   if (!response.ok) {
+  //     const errorText = await response.text();
+  //     console.error("Error merging PDFs:", errorText);
+  //     return;
+  //   }
+  //   // if (response.ok) {
+  //     const result = await response.json();
+  //     const mergedFileUrl = result.mergedFileUrl;
       
-      // Redirect the user to view the merged file
-      window.location.href = mergedFileUrl;
-      //  // Redirect to or download the merged PDF
-      const link = document.createElement("a");
-      link.href = mergedFileUrl;
-      link.download = mergedFileUrl.split("/").pop(); // Use the file name from the URL
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link); // Clean up
+  //     // Redirect the user to view the merged file
+  //     window.location.href = mergedFileUrl;
+  //     //  // Redirect to or download the merged PDF
+  //     const link = document.createElement("a");
+  //     link.href = mergedFileUrl;
+  //     link.download = mergedFileUrl.split("/").pop(); // Use the file name from the URL
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     document.body.removeChild(link); // Clean up
       
-    // } else {
-    //   console.log("Error merging PDFs.");
-    // }
-  } catch (error) {
-    console.error("Error:", error);
-    console.log("An error occurred while merging PDFs.");
-  }
+  //   // } else {
+  //   //   console.log("Error merging PDFs.");
+  //   // }
+  // } catch (error) {
+  //   console.error("Error:", error);
+  //   console.log("An error occurred while merging PDFs.");
+  // }
   // Send the selected pages and files to the backend
   
 }
