@@ -1,6 +1,6 @@
 import multer from "multer";
 import path from "path";
-import { mergePdfs } from "../../merge.js"; // Adjust the import to your file location
+import { mergePdfs } from "./api/merge.js"; // Adjust the import to your file location
 import { rimraf } from "rimraf";
 import fs from "fs/promises";
 
