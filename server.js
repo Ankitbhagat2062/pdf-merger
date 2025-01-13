@@ -1,6 +1,6 @@
 import multer from "multer";
 import path from "path";
-import { mergePdfs } from "./api/merge.js"; // Adjust the import to your file location
+import { mergePdfs } from "../../merge.js";
 import { rimraf } from "rimraf";
 import fs from "fs/promises";
 
@@ -8,7 +8,7 @@ const upload = multer({ dest: "/tmp/uploads/", limits: { fileSize: 50 * 1024 * 1
 
 export const config = {
   api: {
-    bodyParser: false, // Disable default body parser as we use multer
+    bodyParser: false,
   },
 };
 
@@ -22,27 +22,38 @@ export default async function handler(req, res) {
     });
 
     try {
-      // Wait for file upload to complete
       await multerPromise();
 
-      // Merge the uploaded PDFs
-      const filePaths = req.files.map((file) => file.path);
-      const mergedPdfPath = path.join("/tmp", "merged.pdf");
-      await mergePdfs(filePaths, mergedPdfPath);
+      const selectedPages = JSON.parse(req.body.selectedPages || "[]");
+      if (!selectedPages.length) {
+        return res.status(400).send("No pages selected for merging.");
+      }
 
-      // Serve the merged PDF as a response
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", "inline; filename=merged.pdf");
-      const mergedPdf = await fs.readFile(mergedPdfPath);
-      res.status(200).send(mergedPdf);
+      const uploadedFiles = req.files.reduce((acc, file) => {
+        acc[file.originalname] = file.path;
+        return acc;
+      }, {});
 
-      // Clean up temporary files
-      [...filePaths, mergedPdfPath].forEach((filePath) => {
-        rimraf(filePath).catch(console.error);
+      const orderedFiles = selectedPages.map(({ fileName, pageNum }) => {
+        const uploadedFilePath = uploadedFiles[fileName];
+        if (!uploadedFilePath) {
+          throw new Error(`Uploaded file '${fileName}' not found.`);
+        }
+        return { path: uploadedFilePath, range: pageNum };
       });
+
+      const mergedDir = path.join(process.cwd(), "merged_files");
+      await fs.mkdir(mergedDir, { recursive: true });
+
+      const mergedFileName = `merged_${Date.now()}.pdf`;
+      const outputFilePath = path.join(mergedDir, mergedFileName);
+
+      await mergePdfs(orderedFiles, outputFilePath);
+
+      return res.redirect(302, `/merged_files/${mergedFileName}`);
     } catch (error) {
-      console.error("Error handling request:", error.message);
-      res.status(500).send(`An error occurred: ${error.message}`);
+      console.error("Error merging PDFs:", error.message);
+      res.status(500).send(`An error occurred while merging PDFs: ${error.message}`);
     }
   } else {
     res.status(405).send("Method Not Allowed");
