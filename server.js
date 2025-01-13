@@ -5,7 +5,7 @@ import { mergePdfs } from "./merge.js";
 // __dirname workaround for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
+const port = process.env.PORT || 3000;
 const app = express();
 
 // Serve static files from the 'public' folder
@@ -75,6 +75,8 @@ app.post("/merge", upload.array("pdfs", 12), async (req, res) => {
     res.status(500).send(`An error occurred while merging PDFs: ${error.message}`);
   }
 });
-
+app.listen(port, () => {
+  console.log(`App listening at http://localhost:${port} or ${port}`);
+});
 
 export default app;  // Vercel will use this export
