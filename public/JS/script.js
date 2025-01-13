@@ -1,69 +1,81 @@
+// Get references to HTML elements
 const pdfInput = document.getElementById("pdfs");
-let selectedPages = [];
+const previewContainer = document.getElementById("preview-container");
+const selectedPagesInput = document.getElementById("selectedPages");
+const mergeForm = document.getElementById("mergeForm");
 
-// Event listener for file input
+let selectedPages = []; // Array to track selected pages
+
+// Event listener for file input change
 pdfInput.addEventListener("change", (event) => {
   const files = event.target.files;
-  if (files && files[0].type === "application/pdf") {
-    renderMultiplePdfs(files);
+
+  // Check if files are valid PDFs
+  if (files.length > 0) {
+    previewContainer.innerHTML = ""; // Clear the preview container
+    selectedPages = []; // Reset the selected pages array
+    renderMultiplePdfs(files); // Render the uploaded PDFs
   } else {
     alert("Please select valid PDF files.");
   }
 });
 
-// Function to handle multiple PDF files
+// Function to render multiple PDFs
 async function renderMultiplePdfs(files) {
-  const container = document.getElementById("preview-container");
-  container.innerHTML = ""; // Clear previous content
-
   for (let file of files) {
     if (file.type === "application/pdf") {
-      await renderPdf(file);
+      await renderPdf(file); // Render each PDF
     } else {
-      console.log("Please select valid PDF files only.");
+      console.log(`Skipping invalid file: ${file.name}`);
     }
   }
 }
 
+// Function to render a single PDF
 async function renderPdf(file) {
   const pdf = await pdfjsLib.getDocument(URL.createObjectURL(file)).promise;
   const totalPages = pdf.numPages;
-  const container = document.getElementById("preview-container");
 
-  const pages = document.createElement("div");
-  pages.classList.add("pdf-pages");
-  container.appendChild(pages);
+  // Create a container for the PDF pages
+  const pdfContainer = document.createElement("div");
+  pdfContainer.classList.add("pdf-container");
 
   for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
     const canvas = document.createElement("canvas");
     const page = await pdf.getPage(pageNum);
     const viewport = page.getViewport({ scale: 1 });
 
+    // Set canvas dimensions
     canvas.height = viewport.height;
     canvas.width = viewport.width;
+
+    // Render the page on the canvas
     const context = canvas.getContext("2d");
+    await page.render({ canvasContext: context, viewport }).promise;
 
-    await page.render({
-      canvasContext: context,
-      viewport: viewport,
-    }).promise;
-
+    // Create a wrapper for the canvas and checkbox
     const pageWrapper = document.createElement("div");
     pageWrapper.classList.add("pdf-page");
-    pages.appendChild(pageWrapper);
 
+    // Create a checkbox for selecting the page
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.dataset.pageNum = pageNum;
     checkbox.dataset.fileName = file.name;
+
+    // Add change event listener to the checkbox
     checkbox.addEventListener("change", () => handlePageSelection(checkbox));
 
-    const label = document.createElement("label");
-    label.textContent = `Page ${pageNum}`;
+    // Add the canvas and checkbox to the wrapper
     pageWrapper.appendChild(canvas);
-    pageWrapper.appendChild(label);
     pageWrapper.appendChild(checkbox);
+
+    // Add the wrapper to the PDF container
+    pdfContainer.appendChild(pageWrapper);
   }
+
+  // Add the PDF container to the preview section
+  previewContainer.appendChild(pdfContainer);
 }
 
 // Function to handle page selection
@@ -72,20 +84,23 @@ function handlePageSelection(checkbox) {
   const fileName = checkbox.dataset.fileName;
 
   if (checkbox.checked) {
+    // Add the page to the selected pages array
     selectedPages.push({ pageNum, fileName });
   } else {
+    // Remove the page from the selected pages array
     selectedPages = selectedPages.filter(
       (page) => page.pageNum !== pageNum || page.fileName !== fileName
     );
   }
+
+  // Update the hidden input field with the selected pages
+  selectedPagesInput.value = JSON.stringify(selectedPages);
 }
 
-// Attach the mergeSelectedPages function to the form submission
-document.querySelector("form").addEventListener("submit", (event) => {
-  const hiddenInput = document.createElement("input");
-  hiddenInput.type = "hidden";
-  hiddenInput.name = "selectedPages";
-  hiddenInput.value = JSON.stringify(selectedPages);
-
-  event.target.appendChild(hiddenInput); // Add the selected pages to the form data
+// Add an event listener to the form submission
+mergeForm.addEventListener("submit", (event) => {
+  if (selectedPages.length === 0) {
+    event.preventDefault(); // Prevent form submission
+    alert("Please select at least one page to merge.");
+  }
 });
