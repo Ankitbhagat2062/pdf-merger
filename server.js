@@ -1,6 +1,12 @@
-const express = require('express');
-const path = require('path');
+import express from "express";
+import multer from "multer";
+import path from "path";
+import { fileURLToPath } from "url";
+import { mergePdfs } from "./merge.js";
+import { rimraf } from 'rimraf'; // Import rimraf using named export
+import fs from "fs/promises"; // Use promises for file system operations
 const app = express();
+const upload = multer({ dest: "uploads/", limits: { fileSize: 50 * 1024 * 1024 }, });
 const port = process.env.PORT || 3000;  // Vercel sets the port dynamically
 
 // Serve static files from the 'public' directory
@@ -8,8 +14,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 // __dirname workaround for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

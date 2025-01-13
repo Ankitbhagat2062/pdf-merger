@@ -1,18 +1,18 @@
 {
   "name": "pdf-merger",
   "version": "1.0.0",
-  "description": "A simple Express.js backend for PDF merging",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "vercel-build": "echo 'Vercel does not require a build step for this project.'"
   },
   "dependencies": {
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1",
+    "rimraf": "^3.0.2",
+    "fs/promises": "^1.0.0",
+    "path": "^0.12.7"
   },
-  "devDependencies": {},
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs"
+  "type": "module",
+  "license": "ISC"
 }
