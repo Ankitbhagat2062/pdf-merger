@@ -1,8 +1,24 @@
 {
   "name": "pdf-merger",
+<<<<<<< HEAD
+  "version": "2",
+=======
   "version": 2,
+>>>>>>> 251c8bc7c5ebfc82ef276c1d1140e48d2cda4148
   "description": "A Node.js application to merge PDF files using pdf-merger-js and Express.js.",
   "main": "server.js",
+  "builds": [
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.js"
+    }
+  ],
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
