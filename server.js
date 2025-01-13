@@ -79,4 +79,4 @@ app.listen(port, () => {
   console.log(`App listening at http://localhost:${port} or ${port}`);
 });
 
-export default app;  // Vercel will use this export
+// export default app;  // Vercel will use this export
