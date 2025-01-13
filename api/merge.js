@@ -47,6 +47,7 @@ export default async function handler(req, res) {
       await mergePdfs(orderedFiles, outputFilePath);
       const mergedFileUrl = `/merged_files/${mergedFileName}`;
       res.status(200).json({ mergedFileUrl });
+      res.redirect(`/merged_files/${mergedFileName}`);
 
       setTimeout(() => {
         rimraf(outputFilePath)
