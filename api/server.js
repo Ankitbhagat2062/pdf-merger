@@ -1,32 +1,74 @@
-const express = require('express');
-const app = express();
-const PDFLib = require('pdf-lib');
-const fs = require('fs');
-const path = require('path');
+import multer from "multer";
+import path from "path";
+import { mergePdfs } from "../../merge.js"; // Adjust the import to your file location
+import { rimraf } from "rimraf";
+import fs from "fs/promises";
+import pdfjsLib from "pdfjs-dist";
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+const upload = multer({ dest: "/tmp/uploads/", limits: { fileSize: 50 * 1024 * 1024 } });
 
-app.post('/api/merge', async (req, res) => {
-  try {
-    const files = req.files; // Assuming you're sending the files via a form-data POST request
-    const mergedPdf = await PDFLib.PDFDocument.create();
+export const config = {
+  api: {
+    bodyParser: false, // Disable default body parser as we use multer
+  },
+};
 
-    for (const file of files) {
-      const pdfDoc = await PDFLib.PDFDocument.load(file.data);
-      const pages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
-      pages.forEach(page => mergedPdf.addPage(page));
+export default async function handler(req, res) {
+  if (req.method === "POST") {
+    const multerPromise = new Promise((resolve, reject) => {
+      upload.array("pdfs", 12)(req, {}, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+
+    try {
+      // Wait for file upload to complete
+      await multerPromise();
+
+      // Parse the selected pages and file information
+      const selectedPages = JSON.parse(req.body.selectedPages || "[]");
+      if (!selectedPages.length) {
+        return res.status(400).send("No pages selected for merging.");
+      }
+
+      // Map uploaded files to their temporary paths
+      const uploadedFiles = req.files.reduce((acc, file) => {
+        acc[file.originalname] = file.path;
+        return acc;
+      }, {});
+
+      // Load PDF files and render pages
+      const renderedPages = await Promise.all(
+        selectedPages.map(async ({ fileName, pageNum }) => {
+          const filePath = uploadedFiles[fileName];
+          if (!filePath) throw new Error(`File ${fileName} not found.`);
+
+          const pdf = await pdfjsLib.getDocument(filePath).promise;
+          const page = await pdf.getPage(pageNum);
+          const viewport = page.getViewport({ scale: 1 });
+
+          // Render page to a canvas
+          const canvas = createCanvas(viewport.width, viewport.height);
+          const context = canvas.getContext("2d");
+          await page.render({ canvasContext: context, viewport }).promise;
+
+          return canvas.toBuffer("image/png"); // Convert to PNG for preview
+        })
+      );
+
+      // Serve the rendered pages as a response
+      res.status(200).json({ renderedPages });
+
+      // Clean up uploaded files
+      Object.values(uploadedFiles).forEach((filePath) => {
+        rimraf(filePath).catch(console.error);
+      });
+    } catch (error) {
+      console.error("Error handling request:", error.message);
+      res.status(500).send(`An error occurred: ${error.message}`);
     }
-
-    const mergedPdfBytes = await mergedPdf.save();
-    res.setHeader('Content-Type', 'application/pdf');
-    res.send(mergedPdfBytes);
-  } catch (error) {
-    console.error('Error merging PDFs:', error);
-    res.status(500).send('Error merging PDFs');
+  } else {
+    res.status(405).send("Method Not Allowed");
   }
-});
-
-app.listen(3000, () => {
-  console.log('Backend is running on port 3000');
-});
+}
