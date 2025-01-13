@@ -5,96 +5,187 @@ const selectedPagesInput = document.getElementById("selectedPages");
 const mergeForm = document.getElementById("mergeForm");
 
 let selectedPages = []; // Array to track selected pages
-
-// Event listener for file input change
-pdfInput.addEventListener("change", (event) => {
+// Event listener for file input
+document.getElementById('pdfs').addEventListener('change', (event) => {
   const files = event.target.files;
-
-  // Check if files are valid PDFs
-  if (files.length > 0) {
-    previewContainer.innerHTML = ""; // Clear the preview container
-    selectedPages = []; // Reset the selected pages array
-    renderMultiplePdfs(files); // Render the uploaded PDFs
+  if (files && files[0].type === 'application/pdf') {
+    renderMultiplePdfs(files); // Call to render multiple PDFs
   } else {
-    alert("Please select valid PDF files.");
+    alert('Please select valid PDF files.');
   }
+
 });
 
-// Function to render multiple PDFs
+// Function to handle multiple PDF files
 async function renderMultiplePdfs(files) {
+  const container = document.getElementById('preview-container');
+  container.innerHTML = ''; // Clear previous content
+
+  // Iterate through each selected file
   for (let file of files) {
-    if (file.type === "application/pdf") {
+    if (file.type === 'application/pdf') {
       await renderPdf(file); // Render each PDF
     } else {
-      console.log(`Skipping invalid file: ${file.name}`);
+      console.log('Please select valid PDF files only.');
     }
   }
 }
 
-// Function to render a single PDF
+
 async function renderPdf(file) {
-  const pdf = await pdfjsLib.getDocument(URL.createObjectURL(file)).promise;
-  const totalPages = pdf.numPages;
+  const pdf = await pdfjsLib.getDocument(URL.createObjectURL(file)).promise; // Load the PDF
+  const totalPages = pdf.numPages; // Get the total number of pages
+  const container = document.getElementById('preview-container'); // Container for displaying pages
 
-  // Create a container for the PDF pages
-  const pdfContainer = document.createElement("div");
-  pdfContainer.classList.add("pdf-container");
+  // Add the file name as a label above the pages
 
+  const pages = document.createElement('div')
+  pages.classList.add('pdf-pages');
+  container.appendChild(pages);
+
+
+  const fileNameLabel = document.createElement('div');
+  fileNameLabel.classList.add('pdf-file-name');
+  fileNameLabel.textContent = `File: ${file.name}`;
+  pages.appendChild(fileNameLabel);
+  // Create "Select All" checkbox and label
+  const selectall = document.createElement('div')
+  selectall.classList.add('selectall');
+  selectall.classList.add('d-flex');
+  selectall.classList.add('gap-2');
+  selectall.classList.add('justify-content-center');
+  selectall.classList.add('align-items-center');
+  pages.insertBefore(selectall, pages.firstChild);
   for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
-    const canvas = document.createElement("canvas");
+    const canvas = document.createElement('canvas');
     const page = await pdf.getPage(pageNum);
     const viewport = page.getViewport({ scale: 1 });
 
-    // Set canvas dimensions
-    canvas.height = viewport.height;
+    canvas.height = (viewport.height);
     canvas.width = viewport.width;
+    const context = canvas.getContext('2d');
 
-    // Render the page on the canvas
-    const context = canvas.getContext("2d");
-    await page.render({ canvasContext: context, viewport }).promise;
+    await page.render({
+      canvasContext: context,
+      viewport: viewport
+    }).promise;
+    canvas.style.maxWidth = '99.5%';
+    canvas.style.maxHeight = '80.5%';
+    canvas.style.margin = '0 auto';
+    canvas.style.flexShrink = '0 ';
+    console.log(canvas.height, canvas.width)
 
-    // Create a wrapper for the canvas and checkbox
-    const pageWrapper = document.createElement("div");
-    pageWrapper.classList.add("pdf-page");
-
-    // Create a checkbox for selecting the page
+    const pageWrapper = document.createElement('div');
+    pages.appendChild(pageWrapper); // Add the page wrapper to the container
+    pageWrapper.classList.add('pdf-page');
+    const selectall = document.createElement('div')
+    selectall.classList.add('selectall');
+    selectall.classList.add('d-flex');
+    selectall.classList.add('gap-2');
+    selectall.classList.add('justify-content-center');
+    selectall.classList.add('align-items-center');
+    pageWrapper.appendChild(canvas); // Add canvas to the wrapper
+    pageWrapper.appendChild(selectall);
+    // ... (rest of the code for creating checkbox, rendering canvas, etc.) ...
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.dataset.pageNum = pageNum;
     checkbox.dataset.fileName = file.name;
+    checkbox.addEventListener('change', () => handlePageSelection(checkbox)); // Handle page selection
+    const label = document.createElement('label');
+    label.htmlFor = `${file.name}-${pageNum}`; // Use unique IDs for labels
+    label.textContent = `Page ${pageNum}`;
+    selectall.appendChild(label);
+    checkbox.id = `${file.name}-${pageNum}`;
+    checkbox.classList.add(`${file.name}`);
+    selectall.appendChild(checkbox);
 
-    // Add change event listener to the checkbox
-    checkbox.addEventListener("change", () => handlePageSelection(checkbox));
-
-    // Add the canvas and checkbox to the wrapper
-    pageWrapper.appendChild(canvas);
-    pageWrapper.appendChild(checkbox);
-
-    // Add the wrapper to the PDF container
-    pdfContainer.appendChild(pageWrapper);
+    await handleTextOverflow(selectall, fileNameLabel);
   }
 
-  // Add the PDF container to the preview section
-  previewContainer.appendChild(pdfContainer);
+  const selectAllCheckbox = document.createElement('input');
+  selectAllCheckbox.type = "checkbox";
+  selectAllCheckbox.id = `${file.name}-selectAll`;
+
+  const selectAllLabel = document.createElement('label');
+  selectAllLabel.htmlFor = `${file.name}-selectAll`;
+  selectAllLabel.textContent = "Select All Pages of " + file.name;
+
+  selectall.insertBefore(selectAllCheckbox, selectall.firstChild);
+  selectall.insertBefore(selectAllLabel, selectall.firstChild);
+
+  selectAllCheckbox.addEventListener('change', () => {
+    const allCheckboxes = pages.querySelectorAll('input[type="checkbox"]');
+    allCheckboxes.forEach(checkbox => {
+      checkbox.checked = selectAllCheckbox.checked;
+
+      if (selectAllCheckbox.checked) {
+        selectedPages.push({ pageNum: checkbox.dataset.pageNum, fileName: file.name });
+      } else {
+        selectedPages = selectedPages.filter(page => page.pageNum !== checkbox.dataset.pageNum && page.fileName !== file.name);
+      }
+    });
+  });
+}
+async function handleTextOverflow(selectAll, pdfFileName) {
+  if (!pdfFileName || !pdfFileName.parentElement) {
+    console.error("pdfFileName or its parentElement is null");
+    return; // Or handle the error in another way
+  }
+  const parentElement = pdfFileName.parentElement;
+
+  // Store initial parent element styles
+  const initialParentStyles = {
+    display: window.getComputedStyle(parentElement)['display'],
+  };
+
+  // Temporarily apply styles to allow text wrapping
+  await setElementStyles(parentElement, {
+    'white-space': 'normal',
+    'max-width': '100%',
+    'overflow-wrap': 'break-word',
+    'word-break': 'break-all',
+  });
+
+  // Recalculate scrollHeight after applying wrapping styles
+  const newPdfFileNameScrollHeight = pdfFileName.scrollHeight;
+
+  // Restore original parent element styles
+  await setElementStyles(parentElement, initialParentStyles);
+
+  // Set min-height only if necessary
+  if (selectAll.scrollHeight > selectAll.clientHeight) {
+    await setElementStyles(selectAll, {
+      'min-height': `${selectAll.scrollHeight}px`,
+    });
+  }
+
+  if (pdfFileName.scrollHeight > pdfFileName.clientHeight) {
+    await setElementStyles(pdfFileName, {
+      'min-height': `${newPdfFileNameScrollHeight}px`, 
+    }); 
+  }
 }
 
-// Function to handle page selection
+// Define setElementStyles function outside of renderPdf
+async function setElementStyles(el, styles) {
+  for (const [key, value] of Object.entries(styles)) {
+    el.style[key] = value;
+  }
+}
+// Function to handle page selection (order matters)
 function handlePageSelection(checkbox) {
   const pageNum = checkbox.dataset.pageNum;
   const fileName = checkbox.dataset.fileName;
-
+  console.log(pageNum, fileName)
   if (checkbox.checked) {
-    // Add the page to the selected pages array
+    // If page is selected, push it to the selectedPages array
     selectedPages.push({ pageNum, fileName });
+    console.log(selectedPages)
   } else {
-    // Remove the page from the selected pages array
-    selectedPages = selectedPages.filter(
-      (page) => page.pageNum !== pageNum || page.fileName !== fileName
-    );
+    // If page is deselected, remove it from the array
+    selectedPages = selectedPages.filter(page => page.pageNum !== pageNum || page.fileName !== fileName);
   }
-
-  // Update the hidden input field with the selected pages
-  selectedPagesInput.value = JSON.stringify(selectedPages);
 }
 
 // Add an event listener to the form submission
