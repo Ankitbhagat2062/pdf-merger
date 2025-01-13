@@ -207,7 +207,7 @@ async function mergeSelectedPages() {
   });
   try {
     console.log("FormData before sending:", formData);
-    const response = await fetch('/merge', {
+    const response = await fetch('/mergePDF', {
       method: 'POST',
       body: formData,
     });
