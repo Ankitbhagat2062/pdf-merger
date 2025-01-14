@@ -9,7 +9,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Route to serve the index.html
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(path.join(__dirname, "public", "merge.html"));
 });
 
 // Example POST endpoint (if used)
