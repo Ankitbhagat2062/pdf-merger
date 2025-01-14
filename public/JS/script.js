@@ -15,6 +15,26 @@ document.getElementById('pdfs').addEventListener('change', (event) => {
   }
 
 });
+const pdfInput = document.getElementById("pdfs");
+const previewContainer = document.getElementById("preview-container");
+
+pdfInput.addEventListener("change", () => {
+  previewContainer.innerHTML = ""; // Clear previous previews
+
+  Array.from(pdfInput.files).forEach((file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const pdfPreview = document.createElement("div");
+      pdfPreview.classList.add("pdf-preview");
+      pdfPreview.innerHTML = `
+        <p>${file.name}</p>
+        <embed src="${e.target.result}" type="application/pdf" width="200" height="200" />
+      `;
+      previewContainer.appendChild(pdfPreview);
+    };
+    reader.readAsDataURL(file);
+  });
+});
 
 // Function to handle multiple PDF files
 async function renderMultiplePdfs(files) {
@@ -30,22 +50,6 @@ async function renderMultiplePdfs(files) {
     }
   }
 }
-// function handleSelectAll(pagesContainer) {
-//   const checkboxes = pagesContainer.querySelectorAll('input[type="checkbox"]');
-//   checkboxes.forEach(checkbox => {
-//     checkbox.checked = true;
-//     const pageNum = checkbox.dataset.pageNum;
-//     const fileName = checkbox.dataset.fileName;
-//     selectedPages.push({ pageNum, fileName });
-//   });
-//   console.log('Selected Pages:', selectedPages); // Update console with selected pages
-// }
-//   const selectAllButton = document.getElementById(`selectAll-${file.name}`);
-//   const myCheckbox = document.getElementById(`${file.name}`); 
-// selectAllButton.addEventListener('click', () => {
-//   handleSelectAll(pages); // Pass the current pages container (the first occurrence)
-// });
-
 async function renderPdf(file) {
   const pdf = await pdfjsLib.getDocument(URL.createObjectURL(file)).promise; // Load the PDF
   const totalPages = pdf.numPages; // Get the total number of pages
@@ -70,10 +74,6 @@ async function renderPdf(file) {
   selectall.classList.add('justify-content-center');
   selectall.classList.add('align-items-center');
   pages.insertBefore(selectall, pages.firstChild);
-  // pages.insertAdjacentHTML('afterbegin', `
-  //   <label id="selectAll-${file.name}" class="btn btn-primary btn-lg mt-4" for="SelectAll-${file.name}">Select All Pages of ${file.name}</label>
-  //   <input style="display: none;" type="checkbox" id="${file.name}" class="form-control-file" name="SelectAll-${file.name}">
-  //   `);
   for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
     const canvas = document.createElement('canvas');
     const page = await pdf.getPage(pageNum);
@@ -144,61 +144,7 @@ async function renderPdf(file) {
       }
     });
   });
-  // const selectAll = document.querySelector('.selectall');
-  // const pdfFileName = document.querySelector('.pdf-file-name');
   
-  // async function setElementStyles(el, styles) {
-  //   for (const [key, value] of Object.entries(styles)) {
-  //     el.style[key] = value;
-  //   }
-  // }
-  
-  // const data = {
-  //   selectAllScrollHeight: selectAll ? selectAll.scrollHeight : null,
-  //   pdfFileNameScrollHeight: pdfFileName ? pdfFileName.scrollHeight : null,
-  //   selectAllStyles: selectAll ? {
-  //     minHeight: window.getComputedStyle(selectAll)['min-height'],
-  //   } : null,
-  //   pdfFileNameStyles: pdfFileName ? {
-  //     minHeight: window.getComputedStyle(pdfFileName)['min-height'],
-  //   } : null,
-  // };
-  
-  // console.log(`${pdfFileName.scrollHeight}px${selectAll.scrollHeight}px`)
-  
-  // const parentElement = pdfFileName.parentElement; 
-  
-  // // Store initial parent element styles
-  // const initialParentStyles = {
-  //   display: window.getComputedStyle(parentElement)['display'],
-  // };
-  
-  // Temporarily apply styles to allow text wrapping
-  // await setElementStyles(parentElement, {
-  //   'white-space': 'normal',
-  //   'max-width': '100%',
-  //   'overflow-wrap': 'break-word',
-  //   'word-break': 'break-all',
-  // });
-  
-  // // Recalculate scrollHeight after applying wrapping styles
-  // const newPdfFileNameScrollHeight = pdfFileName.scrollHeight;
-  
-  // // Restore original parent element styles
-  // await setElementStyles(parentElement, initialParentStyles);
-  
-  // // Set min-height only if necessary
-  // if (selectAll && selectAll.scrollHeight > selectAll.clientHeight) {
-  //   await setElementStyles(document.querySelector('.selectall'), {
-  //     'min-height': `${selectAll.scrollHeight}px`,
-  //   });
-  // }
-  
-  // if (pdfFileName && pdfFileName.scrollHeight > pdfFileName.clientHeight) {
-  //   await setElementStyles(document.querySelector('.pdf-file-name'), {
-  //     'min-height': `${newPdfFileNameScrollHeight}px`, 
-  //   }); 
-  // }
 }
 async function handleTextOverflow(selectAll, pdfFileName) {
   if (!pdfFileName || !pdfFileName.parentElement) {
