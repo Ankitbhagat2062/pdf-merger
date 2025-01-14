@@ -8,7 +8,7 @@
   ],
   "routes": [
     {
-      "src": "/merge",
+      "src": "/api/merge",
       "dest": "api/merge.js"
     }
   ]
