@@ -8,7 +8,7 @@ const upload = multer({ dest: 'uploads/', limits: { fileSize: 50 * 1024 * 1024 }
 
 // Export the handler for the POST request
 export default async function handler(req, res) {
-  if (req.method === 'POST') {
+  if (req.method === 'post') {
     try {
       // Log request data for debugging
       console.log('Request Body:', req.body); // Check if 'selectedPages' is in the body
