@@ -14,7 +14,7 @@ app.get("/", (req, res) => {
 
 // Example POST endpoint (if used)
 app.post("/api/merge", (req, res) => {
-  res.status(200).send("This is a test POST endpoint!");
+  res.status(200).send("This is a test POST endpoint! Please upload the the file");
 });
 
 // Start the server
