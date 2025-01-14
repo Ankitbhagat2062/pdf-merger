@@ -1,7 +1,8 @@
 import express from 'express';
 import path from 'path';
-import { fileURLToPath } from 'url';
-
+import { fileURLToPath } from "url";
+// import { mergePdfs } from "./merge.js";
+const port = process.env.PORT || 3000;
 // __dirname workaround for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,5 +19,7 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-
-export default app;  // Vercel will use this export
+app.listen(port, () => {
+  console.log(`App listening at http://localhost:${port} or ${port}`);
+});
+// export default app;  // Vercel will use this export
