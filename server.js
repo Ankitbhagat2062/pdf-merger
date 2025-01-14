@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from "url";
-// import { mergePdfs } from "./merge.js";
+import { mergePdfs } from "./merge.js";
 const port = process.env.PORT || 3000;
 // __dirname workaround for ES modules
 const __filename = fileURLToPath(import.meta.url);
