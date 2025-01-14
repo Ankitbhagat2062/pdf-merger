@@ -80,7 +80,7 @@
                     <div class="py-5  text-center">
                         <div class="container my-3 ">
                             <h1>PDF Merger</h1>
-                            <form id="mergeForm" method="post" action="/api/merge" enctype="multipart/form-data">
+                            <form id="mergeForm" method="post" action=/api/merge" enctype="multipart/form-data">
                                 <div class="form-group">
                                     <label id="upload-trigger" class="btn btn-primary btn-lg mt-4"
                                         for="pdfs">Upload</label>
@@ -89,9 +89,7 @@
                                     <p class="mt-3">Add PDF</p>
                                     <small class="text-muted">Supported formats: PDF</small>
                                 </div>
-
-                                <div id="preview-container"
-                                    class="d-flex overflow-auto flex-wrap justify-content-center"></div>
+                                <div id="preview-container"  class="d-flex overflow-auto flex-wrap justify-content-center"></div>
 
                                 <input type="hidden" name="selectedPages" id="selectedPages" />
                                 <button type="submit" class="btn btn-primary my-4">Merge Selected Pages</button>
