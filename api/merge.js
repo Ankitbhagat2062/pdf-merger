@@ -1,43 +1,49 @@
-const multer = require("multer");
-const path = require("path");
-const { mergePdfs } = require("../merge"); // Import your merge logic
-const { rimraf } = require("rimraf");
+const multer = require('multer');
+const path = require('path');
+const { mergePdfs } = require('../merge'); // Ensure merge logic is in '../merge.js'
+const rimraf = require('rimraf');
 
-const upload = multer({ dest: "/tmp/uploads/" });
+// Multer setup for handling file uploads
+const upload = multer({ dest: '/tmp/' }); // Temporary storage on serverless environments
+
+// Helper to parse multipart form data in serverless functions
+const parseForm = (req) => {
+  return new Promise((resolve, reject) => {
+    upload.array('pdfs', 5)(req, {}, (err) => {
+      if (err) return reject(err);
+      resolve(req);
+    });
+  });
+};
 
 module.exports = async (req, res) => {
-  if (req.method === "POST") {
-    const formData = await new Promise((resolve, reject) => {
-      upload.array("pdfs")(req, {}, (err) => {
-        if (err) return reject(err);
-        resolve(req);
+  if (req.method !== 'POST') {
+    res.status(405).send('Method Not Allowed');
+    return;
+  }
+
+  try {
+    await parseForm(req);
+
+    // Access uploaded files
+    const uploadedFiles = req.files.map((file) => file.path);
+    const outputFilePath = `/tmp/merged_${Date.now()}.pdf`;
+
+    // Merge the PDFs
+    await mergePdfs(uploadedFiles, outputFilePath);
+
+    // Return the merged file URL
+    res.setHeader('Content-Type', 'application/json');
+    res.json({ fileUrl: outputFilePath });
+
+    // Clean up merged files after 1 minute
+    setTimeout(() => {
+      rimraf(outputFilePath, (err) => {
+        if (err) console.error('Error cleaning up merged file:', err);
       });
-    });
-
-    try {
-      const files = formData.files || [];
-      if (files.length === 0) {
-        return res.status(400).json({ error: "No files uploaded" });
-      }
-
-      // Simulate merging PDFs
-      const outputFilePath = path.join("/tmp", "merged.pdf");
-      await mergePdfs(files.map((file) => file.path), outputFilePath);
-
-      res.status(200).json({
-        message: "Merge successful",
-        fileUrl: `/tmp/merged.pdf`, // You'll need to provide a way to download this file
-      });
-
-      // Cleanup after some time
-      setTimeout(() => {
-        rimraf(outputFilePath).catch(console.error);
-      }, 60 * 1000); // 1 minute
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Failed to merge PDFs", details: err.message });
-    }
-  } else {
-    res.status(405).json({ error: "Method not allowed" });
+    }, 60 * 1000);
+  } catch (error) {
+    console.error('Error merging PDFs:', error);
+    res.status(500).send('An error occurred while merging PDFs.');
   }
 };
