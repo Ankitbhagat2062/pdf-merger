@@ -29,7 +29,7 @@
     "pdf-merger-js": "^5.1.2",
     "pdfjs-dist": "^4.10.38",
     "rimraf": "^6.0.1",
-    "vercel": "^32.3.0"
+    "vercel": "^39.3.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
