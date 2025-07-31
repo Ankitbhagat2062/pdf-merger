@@ -1,25 +1,17 @@
-import { PDFDocument } from "pdf-lib";
+import PDFMerger from "pdf-merger-js";
 
-/**
- * Merges selected pages from multiple PDF files.
- * @param {Array} orderedFiles - Array of objects with file path and range properties.
- * @returns {Buffer} - Buffer of the merged PDF.
- */
-export async function mergePdfs(orderedFiles) {
-  const mergedPdf = await PDFDocument.create();
+const mergePdfs = async (orderedFiles, outputPath) => {
+  const merger = new PDFMerger();
 
-  for (const { path, range } of orderedFiles) {
-    // Read file as a buffer
-    const pdfBytes = await fs.readFile(path);
-    const pdfDoc = await PDFDocument.load(pdfBytes);
-
-    // Add specified pages to the merged PDF
-    for (const pageNum of range) {
-      const [copiedPage] = await mergedPdf.copyPages(pdfDoc, [pageNum - 1]); // Pages are zero-indexed
-      mergedPdf.addPage(copiedPage);
+  for (const file of orderedFiles) {
+    if (file.range === "all") {
+      await merger.add(file.path); // Add the entire file
+    } else {
+      await merger.add(file.path, file.range); // Add specific pages
     }
   }
 
-  // Serialize the merged PDF to a buffer
-  return await mergedPdf.save();
-}
+  await merger.save(outputPath); // Save the merged PDF to the specified path
+};
+
+export { mergePdfs };

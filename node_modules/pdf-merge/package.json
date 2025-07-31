@@ -1,0 +1,38 @@
+{
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "name": "pdf-merge",
+  "version": "1.2.0",
+  "description": "Merge PDF files into a single PDF document",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wubzz/pdf-merge.git"
+  },
+  "keywords": [
+    "pdf-merge",
+    "pdf",
+    "merge"
+  ],
+  "author": "wubzz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wubzz/pdf-merge/issues"
+  },
+  "homepage": "https://github.com/wubzz/pdf-merge",
+  "scripts": {
+    "test": "mocha test --exit"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "shell-escape": "^0.2.0",
+    "tmp": "0.0.33"
+  },
+  "devDependencies": {
+    "expect": "^1.20.2",
+    "mocha": "^5.2.0",
+    "pdf2json": "^1.1.7",
+    "rimraf": "^2.6.2"
+  }
+}
