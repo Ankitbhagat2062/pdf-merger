@@ -12,9 +12,16 @@ const port = process.env.PORT || 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Serve static files from the public directory
+app.use("/CSS", express.static(path.join(__dirname, "public", "CSS")));
+app.use("/JS", express.static(path.join(__dirname, "public","JS")));
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public","index.html"));
+});
 app.post("/merge", upload.array("pdfs", 12), async (req, res) => {
   try {
     // Log request data for debugging
@@ -73,3 +80,7 @@ app.post("/merge", upload.array("pdfs", 12), async (req, res) => {
     res.status(500).send(`An error occurred while merging PDFs: ${error.message}`);
   }
 });
+app.listen(port, () => {
+  console.log(`App listening at http://localhost:${port} or ${port}`);
+});
+
