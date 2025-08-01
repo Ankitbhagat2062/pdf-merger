@@ -24,13 +24,13 @@
     "dir-compress": "^0.0.5",
     "express": "^4.21.2",
     "formidable": "^3.5.4",
-    "multer": "^1.4.5-lts.1",
+    "multer": "^2.0.2",
     "pdf-lib": "^1.17.1",
     "pdf-merge": "^1.2.0",
     "pdf-merger-js": "^5.1.2",
     "pdfjs-dist": "^4.10.38",
     "rimraf": "^6.0.1",
-    "vercel": "^32.3.0"
+    "vercel": "^32.7.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
