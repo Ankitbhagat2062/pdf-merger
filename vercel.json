@@ -8,12 +8,12 @@
   ],
   "routes": [
     {
-      "src": "/merge",
-      "dest": "server.js"
-    },
-    {
       "src": "/(CSS|JS|favicon.ico|merged_files)/(.*)",
       "dest": "/public/$1/$2"
+    },
+    {
+      "src": "/merge",
+      "dest": "server.js"
     },
     {
       "src": "/(.*)",
