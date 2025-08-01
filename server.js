@@ -14,6 +14,9 @@ const __dirname = path.dirname(__filename);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 app.post("/merge", upload.array("pdfs", 12), async (req, res) => {
   try {
     // Log request data for debugging
