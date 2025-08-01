@@ -129,7 +129,7 @@ async function renderPdf(file) {
       }
     });
   });
- 
+
 }
 async function handleTextOverflow(selectAll, pdfFileName) {
   if (!pdfFileName || !pdfFileName.parentElement) {
@@ -166,8 +166,8 @@ async function handleTextOverflow(selectAll, pdfFileName) {
 
   if (pdfFileName.scrollHeight > pdfFileName.clientHeight) {
     await setElementStyles(pdfFileName, {
-      'min-height': `${newPdfFileNameScrollHeight}px`, 
-    }); 
+      'min-height': `${newPdfFileNameScrollHeight}px`,
+    });
   }
 }
 
@@ -205,38 +205,30 @@ async function mergeSelectedPages() {
   const files = document.getElementById('pdfs').files;
   Array.from(files).forEach(file => {
     formData.append('pdfs', file);
-    console.log("pdfs",file)
+    console.log("pdfs", file)
   });
   // Send the selected pages and files to the backend
   try {
     console.log("FormData before sending:", formData);
-    const response = await fetch('/merge', {
+    const response = await fetch('/api/merge', {
       method: 'POST',
       body: formData,
     });
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.log(errorText); // Show error message to the user
-    } 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Error merging PDFs:", errorText);
-      return;
+      const text = await response.text();
+      throw new Error(text);
     }
-    // if (response.ok) {
-      const result = await response.json();
-      const mergedFileUrl = result.mergedFileUrl;
-      
-      // Redirect the user to view the merged file
-      window.location.href = mergedFileUrl;
-      //  // Redirect to or download the merged PDF
-      const link = document.createElement("a");
-      link.href = mergedFileUrl;
-      link.download = mergedFileUrl.split("/").pop(); // Use the file name from the URL
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link); // Clean up
-      
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'merged.pdf'; // or parse filename from headers if you want
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
     // } else {
     //   console.log("Error merging PDFs.");
     // }
