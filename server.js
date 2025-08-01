@@ -3,26 +3,15 @@ import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
 import { mergePdfs } from "./merge.js";
-import { rimraf } from 'rimraf'; 
+import { rimraf } from 'rimraf';
 const app = express();
 const upload = multer({ dest: "uploads/", limits: { fileSize: 50 * 1024 * 1024 }, });
-const port = process.env.PORT || 3000;
 
 // __dirname workaround for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Serve static files from the public directory
-app.use("/CSS", express.static(path.join(__dirname, "public", "CSS")));
-app.use("/JS", express.static(path.join(__dirname, "public","JS")));
 app.use(express.static(path.join(__dirname, "public")));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Serve index.html on root route
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public","index.html"));
-});
 
 app.post("/merge", upload.array("pdfs", 12), async (req, res) => {
   try {
@@ -51,17 +40,17 @@ app.post("/merge", upload.array("pdfs", 12), async (req, res) => {
       return { path: uploadedFilePath, range: pageNum }; // Assuming you want to merge specific page ranges
     });
     let mergedFileName = "merged";
-      req.files.forEach(
-        (file) =>
-          (mergedFileName += `_${file.originalname.replace(".pdf", "")}`)
-      );
-      mergedFileName += `_${Date.now()}.pdf`;
+    req.files.forEach(
+      (file) =>
+        (mergedFileName += `_${file.originalname.replace(".pdf", "")}`)
+    );
+    mergedFileName += `_${Date.now()}.pdf`;
     const outputFilePath = path.join(__dirname, "public", "merged_files", mergedFileName);
     //   // Merge the selected pages from ordered files
     await mergePdfs(orderedFiles, outputFilePath);
     const mergedFileUrl = `/merged_files/${mergedFileName}`;
-    res.status(200).json({mergedFileUrl})
-    console.log({mergedFileUrl})
+    res.status(200).json({ mergedFileUrl });
+    console.log({ mergedFileUrl });
     //  // Redirect the user to the merged file for download/viewing
     // res.redirect(`/merged_files/${mergedFileName}`);
 
@@ -83,8 +72,6 @@ app.post("/merge", upload.array("pdfs", 12), async (req, res) => {
   }
 });
 
-if (process.env.NODE_ENV !== "production") {
-  app.listen(port, () => {
-    console.log(`App listening at http://localhost:${port} or ${port}`);
-  });
-}
+// Remove app.listen for Vercel serverless function deployment
+
+export default app;
