@@ -19,9 +19,11 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve index.html on root route
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public","index.html"));
 });
+
 app.post("/merge", upload.array("pdfs", 12), async (req, res) => {
   try {
     // Log request data for debugging
@@ -80,7 +82,11 @@ app.post("/merge", upload.array("pdfs", 12), async (req, res) => {
     res.status(500).send(`An error occurred while merging PDFs: ${error.message}`);
   }
 });
-app.listen(port, () => {
-  console.log(`App listening at http://localhost:${port} or ${port}`);
-});
 
+if (process.env.NODE_ENV === "production") {
+  // Do not start app.listen on production (Vercel)
+} else {
+  app.listen(port, () => {
+    console.log(`App listening at http://localhost:${port} or ${port}`);
+  });
+}
