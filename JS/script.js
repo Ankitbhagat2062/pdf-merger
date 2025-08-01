@@ -30,21 +30,6 @@ async function renderMultiplePdfs(files) {
     }
   }
 }
-// function handleSelectAll(pagesContainer) {
-//   const checkboxes = pagesContainer.querySelectorAll('input[type="checkbox"]');
-//   checkboxes.forEach(checkbox => {
-//     checkbox.checked = true;
-//     const pageNum = checkbox.dataset.pageNum;
-//     const fileName = checkbox.dataset.fileName;
-//     selectedPages.push({ pageNum, fileName });
-//   });
-//   console.log('Selected Pages:', selectedPages); // Update console with selected pages
-// }
-//   const selectAllButton = document.getElementById(`selectAll-${file.name}`);
-//   const myCheckbox = document.getElementById(`${file.name}`); 
-// selectAllButton.addEventListener('click', () => {
-//   handleSelectAll(pages); // Pass the current pages container (the first occurrence)
-// });
 
 async function renderPdf(file) {
   const pdf = await pdfjsLib.getDocument(URL.createObjectURL(file)).promise; // Load the PDF
