@@ -85,6 +85,9 @@ app.post("/merge", upload.array("pdfs", 12), async (req, res) => {
 
 if (process.env.NODE_ENV === "production") {
   // Do not start app.listen on production (Vercel)
+  app.listen(port, () => {
+    console.log(`App listening at http://localhost:${port} or ${port}`);
+  });
 } else {
   app.listen(port, () => {
     console.log(`App listening at http://localhost:${port} or ${port}`);
